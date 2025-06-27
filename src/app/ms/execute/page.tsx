@@ -30,6 +30,9 @@ export default function Execute() {
                         <span className='text-gray-700 transition-colors duration-200 group-hover:text-gray-900'>Normal</span>
                     </div>
                 </div>
+                <div className='rounded-lg bg-white/30 backdrop-blur-xs flex flex-row justify-center items-center py-6'>
+                    <img src="/assets/no-data.png" className='w-32 h-32' />
+                </div>
             </div>
         </div>
     </div>
