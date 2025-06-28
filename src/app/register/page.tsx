@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 export default function RegisterPage() {
@@ -105,7 +106,7 @@ export default function RegisterPage() {
                     Register Now
                 </button>
                 <div className="flex justify-center w-full mb-4">
-                    <a href="/" className="text-purple-400 text-sm hover:underline">Log in</a>
+                    <Link href="/" className="text-purple-400 text-sm hover:underline">Log in</Link>
                 </div>
                 <div className="text-gray-200 text-xs mt-2">version number: 1.1.25</div>
             </form>
