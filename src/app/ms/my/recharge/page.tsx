@@ -1,5 +1,6 @@
 'use client'
 
+import { coins } from '@/utils/data/coin';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -7,15 +8,6 @@ export default function RechargeAmount() {
     const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
     const [amount, setAmount] = useState<number>(160);
     const router = useRouter();
-
-    const coins = [
-        { icon: '/assets/coin/usdt-polygon.png', label: 'USDT.Polygon' },
-        { icon: '/assets/coin/usdt-trc20.png', label: 'USDT.TRC20' },
-        { icon: '/assets/coin/usdc-polygon.png', label: 'USDC.Polygon' },
-        { icon: '/assets/coin/usdt-erc20.png', label: 'USDT.ERC20' },
-        { icon: '/assets/coin/eth.png', label: 'ETH' },
-        { icon: '/assets/coin/btc.png', label: 'BTC' }
-    ];
 
     const handleConfirm = () => {
         router.push('/ms/recharge/confirm');
@@ -26,7 +18,7 @@ export default function RechargeAmount() {
             <div className="w-full max-w-3/4 flex flex-col items-center">
                 <div className="w-full max-w-3/4 flex flex-col items-center mb-24">
                     <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 w-full">
-                        {coins.map((coin) => (
+                        {coins && coins.map((coin) => (
                             <RechargeOption key={coin.label} icon={coin.icon} label={coin.label} selected={selectedCoin === coin.label} onClick={() => setSelectedCoin(coin.label)} />
                         ))}
                     </div>
