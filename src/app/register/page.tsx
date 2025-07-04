@@ -70,7 +70,7 @@ export default function RegisterPage() {
         </div>
         <div className="flex items-center w-full mb-4 border-b border-gray-300">
           <select
-            className="bg-transparent text-white border-none outline-none pr-2 text-sm"
+            className="bg-transparent text-black border-none outline-none pr-2 text-sm"
             id="countryCode"
             name="countryCode"
             value={formik.values.countryCode}
