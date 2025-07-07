@@ -30,7 +30,6 @@ export async function registerUser(phone: string, password: string, username: st
     const user = await account.create(ID.unique(), email, password, username);
 
     // 2. Clear any existing session and log in as the new user to get a session (required for updatePrefs)
-    await account.deleteSessions();
     await account.createEmailPasswordSession(email, password);
 
     // 3. Now update preferences as the authenticated user
