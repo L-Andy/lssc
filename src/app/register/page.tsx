@@ -71,7 +71,7 @@ export default function RegisterPage() {
         const phoneWithCode = `${values.countryCode}${values.phone}`;
         await registerUser(phoneWithCode, values.password, values.username, values.email);
         setSuccess('Registration successful! You can now log in.');
-        router.replace('/ms')
+        router.push('/ms')
       } catch (err: any) {
         setError(err?.message || 'Registration failed');
       } finally {
