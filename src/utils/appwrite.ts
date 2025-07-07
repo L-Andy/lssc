@@ -22,8 +22,17 @@ export interface RegisterUserData {
     [key: string]: string | undefined;
 }
 
+// Fix for "User (role: guests) missing scope (account)"
+// The error typically means the current session is not authenticated (still a guest).
+// After registration, you must create a session for the new user before calling account.updatePrefs.
 export async function registerUser(phone: string, password: string, username: string, email: string) {
+    // 1. Create the user
     const user = await account.create(ID.unique(), email, password, username);
+
+    // 2. Log in as the new user to get a session (required for updatePrefs)
+    await account.createEmailPasswordSession(email, password);
+
+    // 3. Now update preferences as the authenticated user
     await account.updatePrefs({ phone });
 
     return user;
