@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { registerUser } from '@/utils/appwrite';
@@ -21,15 +21,10 @@ export default function RegisterPage() {
   const [codeButtonDisabled, setCodeButtonDisabled] = useState(false);
   const [codeButtonTimer, setCodeButtonTimer] = useState(0);
 
-  React.useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (codeButtonTimer > 0) {
-      timer = setTimeout(() => setCodeButtonTimer(codeButtonTimer - 1), 1000);
-    } else if (codeButtonTimer === 0 && codeButtonDisabled) {
-      setCodeButtonDisabled(false);
-    }
-    return () => clearTimeout(timer);
-  }, [codeButtonTimer, codeButtonDisabled]);
+  useEffect(() => {
+    setGeneratedCode(generateVerificationCode())
+    return () => {};
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -60,8 +55,7 @@ export default function RegisterPage() {
         .oneOf([Yup.ref('password')], 'Passwords must match'),
       verificationCode: Yup.string()
         .required('Verification code is required')
-        .test('match', 'Verification code is incorrect', function (value) {
-          if (!codeSent) return true; // Don't validate if code not sent yet
+        .test('code-match', 'Verification code is incorrect', function(value) {
           return value === generatedCode;
         }),
       agree: Yup.boolean().oneOf([true], 'You must agree to the User Registration Agreement'),
@@ -71,21 +65,11 @@ export default function RegisterPage() {
       setSuccess(null);
       setLoading(true);
       try {
-        if (!codeSent) {
-          setError('Please request and enter the verification code.');
-          setLoading(false);
-          return;
-        }
-        if (values.verificationCode !== generatedCode) {
-          setError('Verification code is incorrect.');
-          setLoading(false);
-          return;
-        }
         const phoneWithCode = `${values.countryCode}${values.phone}`;
         await registerUser(phoneWithCode, values.password, values.username, values.email);
         setSuccess('Registration successful! You can now log in.');
         // Optionally redirect to login page:
-        // window.location.href = '/';
+        window.location.href = '/ms';
       } catch (err: any) {
         setError(err?.message || 'Registration failed');
       } finally {
@@ -94,26 +78,10 @@ export default function RegisterPage() {
     },
   });
 
-  const handleSendCode = () => {
-    if (!formik.values.phone || formik.errors.phone) {
-      setError('Please enter a valid phone number before requesting the code.');
-      return;
-    }
-    const code = generateVerificationCode(4);
-    setGeneratedCode(code);
-    setCodeSent(true);
-    setCodeButtonDisabled(true);
-    setCodeButtonTimer(60); // 60 seconds cooldown
-    setError(null);
-    // In a real app, send the code via SMS or email here.
-    // For demo, just show an alert (remove in production):
-    alert(`Your verification code is: ${code}`);
-  };
-
   return (
     <div className="min-h-screen flex flex-row justify-center pt-24 relative bg-[url('/assets/login-bg.png')] bg-cover bg-top bg-no-repeat overflow-auto">
       <form className="relative z-10 flex flex-col items-center w-full max-w-xs" onSubmit={formik.handleSubmit} autoComplete="off">
-        <h2 className="text-white text-xl font-semibold mb-2">User Registration</h2>
+        <h2 className="text-white text-xl font-semibold mb-2">User </h2>
         <div className="text-gray-200 text-xs mb-6 flex my-8 items-center gap-1 cursor-pointer select-none">
           English
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -257,16 +225,10 @@ export default function RegisterPage() {
             onBlur={formik.handleBlur}
             required
             autoComplete="off"
-            disabled={!codeSent}
           />
-          <button
-            type="button"
-            className={`ml-2 bg-white/20 text-white px-2 py-1 rounded text-xs border border-white/30 hover:bg-white/30 transition ${codeButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={handleSendCode}
-            disabled={codeButtonDisabled}
-          >
-            {codeButtonDisabled ? `Resend (${codeButtonTimer}s)` : (codeSent ? 'Resend' : 'Send')}
-          </button>
+          <span className="ml-4 text-green-400 text-lg">
+            {generatedCode}
+          </span>
         </div>
         {formik.touched.verificationCode && formik.errors.verificationCode && (
           <div className="text-red-400 text-xs mb-2 w-full text-left">{formik.errors.verificationCode}</div>
