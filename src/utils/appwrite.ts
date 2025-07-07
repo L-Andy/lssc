@@ -34,6 +34,7 @@ export async function registerUser(phone: string, password: string, username: st
 
     // 3. Now update preferences as the authenticated user
     await account.updatePrefs({ phone });
+    await account.deleteSessions()
 
     return user;
 }
