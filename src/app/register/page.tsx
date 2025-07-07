@@ -5,6 +5,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { registerUser } from '@/utils/appwrite';
 import { countries } from '@/utils/data/countries';
+import { useRouter } from 'next/navigation';
 
 function generateVerificationCode(length = 4) {
   return Math.floor(Math.pow(10, length - 1) + Math.random() * 9 * Math.pow(10, length - 1)).toString();
@@ -20,6 +21,8 @@ export default function RegisterPage() {
   const [codeSent, setCodeSent] = useState(false);
   const [codeButtonDisabled, setCodeButtonDisabled] = useState(false);
   const [codeButtonTimer, setCodeButtonTimer] = useState(0);
+
+  const router = useRouter()
 
   useEffect(() => {
     setGeneratedCode(generateVerificationCode())
@@ -68,8 +71,7 @@ export default function RegisterPage() {
         const phoneWithCode = `${values.countryCode}${values.phone}`;
         await registerUser(phoneWithCode, values.password, values.username, values.email);
         setSuccess('Registration successful! You can now log in.');
-        // Optionally redirect to login page:
-        window.location.href = '/ms';
+        router.replace('/ms')
       } catch (err: any) {
         setError(err?.message || 'Registration failed');
       } finally {
