@@ -23,7 +23,7 @@ export default function Join() {
                                             Single equipment daily profit: <span className="text-gray-600 font-bold">{product.profit_value}</span>
                                         </span>
                                         <div className="mt-2">
-                                            <VipButton disabled={!product.rentable} onClick={() => {product.rentable && router.push(`/ms/join/${product.id}`)}}>
+                                            <VipButton disabled={!product.rentable} onClick={() => { product.rentable && router.push(`/ms/join/${product.id}`) }}>
                                                 {product.rentable ? 'Rent' : 'Unable to purchase'}
                                             </VipButton>
                                         </div>
@@ -42,6 +42,16 @@ export default function Join() {
                             </div>
                         </div>
                     ))}
+                    <div className="w-full h-56 rounded-2xl overflow-hidden">
+                        <iframe
+                            className="w-full h-full"
+                            src="https://www.youtube.com/shorts/U5vG53DnU2c"
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
             </div>
         </div>

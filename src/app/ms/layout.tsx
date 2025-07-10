@@ -18,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const tabs = [
     {
       key: '',
-      label: 'Accueil',
+      label: 'Home',
       route: '/ms',
       activeImg: '/assets/tabs/Home.png',
       inactiveImg: '/assets/tabs/HOME1.png',
@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     {
       key: 'join',
-      label: 'Scanner',
+      label: 'Join',
       route: '/ms/join',
       activeImg: '/assets/tabs/energy.png',
       inactiveImg: '/assets/tabs/ENERGY1.png',
@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     {
       key: 'execute',
-      label: 'Exécuter',
+      label: 'Run',
       route: '/ms/execute',
       activeImg: '/assets/tabs/EAPB.png',
       inactiveImg: '/assets/tabs/EAPB1.png',
@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     {
       key: 'share',
-      label: 'Partager',
+      label: 'Share',
       route: '/ms/share',
       activeImg: '/assets/tabs/share.png',
       inactiveImg: '/assets/tabs/SHARE1.png',
@@ -50,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     {
       key: 'my',
-      label: 'Mon',
+      label: 'My',
       route: '/ms/my',
       activeImg: '/assets/tabs/my.png',
       inactiveImg: '/assets/tabs/MY1.png',
@@ -72,7 +72,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Social Icons */}
             <div className="flex items-center space-x-4">
-              <a href="#" className="text-blue-500">
+              <a href="https://t.me/lssc_admin" className="text-blue-500">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z" />
                 </svg>
