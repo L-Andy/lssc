@@ -4,10 +4,11 @@ import { useParams, useRouter } from 'next/navigation';
 import VipButton from '@/vip/Button';
 import Image from 'next/image';
 import { products } from '@/utils/data/products';
-import { createRenting, getCurrentUserId } from '@/utils/appwrite';
-import { useState } from 'react';
+import { createRenting, getCurrentUser, getCurrentUserId } from '@/utils/appwrite';
+import { useEffect, useState } from 'react';
 
 export default function JoinProductPage() {
+    const [trial, setTrial] = useState<boolean>()
     const params = useParams();
     const id = params?.id;
     const product = products.find(p => p.id === id);
@@ -39,14 +40,32 @@ export default function JoinProductPage() {
             endDate.setDate(startDate.getDate() + 7);
 
             await createRenting(userId, product.id, startDate.toISOString(), endDate.toISOString(), product.price, 'pending');
-            setSuccess('Renting created successfully! Proceeding to payment...');
-            router.push(`/ms/join/${product.id}/payment`);
+            setSuccess(trial ? "Product has been rented!" : "Renting created successfully! Proceeding to payment...");
+            if (!trial) {
+                router.push(`/ms/join/${product.id}/payment`)
+            }
         } catch (err: any) {
             setError(err?.message || 'Failed to create renting.');
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        async function fetchUser() {
+            const user = await getCurrentUser();
+            if (user && user.prefs && user.prefs.registrationDate) {
+                const registrationDate = new Date(user.prefs.registrationDate);
+                const now = new Date();
+                const diffInMs = now.getTime() - registrationDate.getTime();
+                const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                setTrial(diffInDays <= 3);
+            } else {
+                setTrial(false);
+            }
+        }
+        fetchUser();
+    }, []);
 
     if (!product) {
         return (
@@ -60,7 +79,13 @@ export default function JoinProductPage() {
         <div className="flex flex-col items-center py-8 w-full">
             <div className="w-full flex justify-center">
                 <div className="w-full max-w-[370px]">
-                    <div className="relative bg-white/50 rounded-2xl border border-yellow-200 shadow-lg w-full flex flex-col items-center">
+                    {trial && <div className="flex items-center justify-center bg-yellow-100 border border-yellow-300 rounded-xl px-4 py-3 gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-yellow-800 font-semibold text-base">3-Day Free Trial</span>
+                            <span className="text-yellow-700 text-sm">You are currently enjoying a 3-day trial period!.</span>
+                        </div>
+                    </div>}
+                    <div className="relative mt-8 bg-white/50 rounded-2xl border border-yellow-200 shadow-lg w-full flex flex-col items-center">
                         <div className="flex flex-col w-full h-full">
                             <div className="flex flex-row items-center justify-between w-full">
                                 <div className="flex items-center px-4">
