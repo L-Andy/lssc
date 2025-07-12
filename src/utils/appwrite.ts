@@ -25,8 +25,17 @@ export interface RegisterUserData {
 export async function registerUser(phone: string, password: string, username: string, email: string) {
     const user = await account.create(ID.unique(), email, password, username);
 
+    await account.createEmailPasswordSession(email, password);
+
     await account.updatePrefs({ phone, registrationDate: new Date().toISOString() });
-    return user
+    try {
+        const sessions = await account.listSessions();
+        for (const session of sessions.sessions) {
+            await account.deleteSession(session.$id);
+        }
+    } catch (err) {
+        // Optionally handle error, but ignore if listing/deleting sessions fails
+    }
 }
 
 export async function getCurrentUserId() {
