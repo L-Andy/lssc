@@ -25,11 +25,8 @@ export interface RegisterUserData {
 export async function registerUser(phone: string, password: string, username: string, email: string) {
     const user = await account.create(ID.unique(), email, password, username);
 
-    await account.createEmailPasswordSession(email, password);
-
     await account.updatePrefs({ phone, registrationDate: new Date().toISOString() });
-
-    return user;
+    return user
 }
 
 export async function getCurrentUserId() {
