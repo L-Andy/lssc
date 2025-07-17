@@ -1,4 +1,4 @@
-import { Client, Account, ID, Databases } from 'appwrite';
+import { Client, Account, ID, Databases, Query } from 'appwrite';
 
 const APPWRITE_ENDPOINT = "https://fra.cloud.appwrite.io/v1";
 const APPWRITE_PROJECT_ID = "lscc";
@@ -7,6 +7,7 @@ const APPWRITE_RENTINGS_COLLECTION_ID = "rentings";
 const APPWRITE_EQUIPMENT_COLLECTION_ID = "equipments";
 
 const appwriteClient = new Client();
+const database = new Databases(appwriteClient);
 
 appwriteClient
     .setEndpoint(APPWRITE_ENDPOINT)
@@ -68,7 +69,6 @@ export async function updateUserPassword(userId: string, newPassword: string, ol
 }
 
 export async function createEquipment(userId: string, equipmentName: string, equipmentType: string, details: Record<string, string> = {}) {
-    const database = new Databases(appwriteClient);
     const collectionId = APPWRITE_EQUIPMENT_COLLECTION_ID;
     return database.createDocument(
         APPWRITE_DATABASE_ID,
@@ -97,4 +97,16 @@ export async function createRenting(userId: string, productId: string, startDate
         ID.unique(),
         { userId, productId, startDate, endDate, amount, status, ...extraDetails }
     );
+}
+
+export async function getUserRentings(userId: string) {
+    const response = await database.listDocuments(
+        APPWRITE_DATABASE_ID,
+        APPWRITE_RENTINGS_COLLECTION_ID,
+        [
+            Query.equal('userId', userId)
+        ]
+    );
+
+    return response.documents;
 }

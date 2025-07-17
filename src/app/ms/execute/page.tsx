@@ -1,6 +1,65 @@
 'use client'
 
+import { account, getUserRentings } from '@/utils/appwrite';
+import { useEffect, useState } from 'react';
+import { products } from '@/utils/data/products';
+
 export default function Execute() {
+    const [user, setUser] = useState<any>(null);
+    const [rentings, setRentings] = useState<any[]>([])
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const userData = await account.get();
+                setUser(userData);
+            } catch (err: any) {
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        async function fetchRentings() {
+            if (user && user.$id) {
+                try {
+
+                    const data = await getUserRentings(user.$id);
+                    const enrichedRentings = data.map((renting: any) => {
+                        const product = products.find(p => p.id === renting.productId);
+                        let profit = 0;
+                        if (product) {
+                            const startDate = new Date(renting.$createdAt || renting.startDate);
+                            const endDate = new Date();
+                            const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+                            const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                            profit = (product.profit_value / 100) * product.price * diffDays;
+                        }
+                        return {
+                            ...renting,
+                            product,
+                            profit,
+                        };
+                    });
+
+                    setRentings(enrichedRentings);
+                } catch (err) {
+                    setRentings([]);
+                }
+            } else {
+                setRentings([]);
+            }
+        }
+        fetchRentings();
+    }, [user]);
+
+    console.log('Rentings')
+    console.log(rentings)
+
     return <div className="flex flex-col items-center py-8 w-full">
         <div className="w-full flex justify-center">
             <div className="w-full max-w-[370px] space-y-8">
@@ -30,9 +89,53 @@ export default function Execute() {
                         <span className='text-gray-700 transition-colors duration-200 group-hover:text-gray-900'>Normal</span>
                     </div>
                 </div>
-                <div className='rounded-lg bg-white/30 backdrop-blur-xs flex flex-row justify-center items-center py-6'>
-                    <img src="/assets/no-data.png" className='w-32 h-32' />
-                </div>
+                {rentings && rentings.length > 0 ? (
+                    rentings.map((renting: any) => {
+                        const product = renting.product;
+                        const productName = "LSSC-" + Math.floor(Math.random() * 10000);
+                        const productImage = product?.image || '/assets/no-data.png';
+                        const initialInvestment = product?.price || 0;
+                        const profit = renting.profit || 0;
+                        const grossIncome = initialInvestment + profit;
+                        const unitPrice = product?.price || 0;
+                        const runTime = renting.runTime || 0;
+                        const runTimeDisplay = runTime ? `${runTime}h` : 'N/A';
+                        const deliveringRentalUnitPrice = unitPrice && runTime
+                            ? `${unitPrice} / ${runTimeDisplay}`
+                            : 'N/A';
+
+                        return (
+                            <div key={renting.$id || product?.id} className="relative bg-white/50 rounded-2xl border border-yellow-200 shadow-lg w-full flex flex-col items-center mb-6">
+                                <div className="flex flex-col w-full h-full">
+                                    <div className="flex flex-row items-center justify-between w-full">
+                                        <div className="flex items-center px-4">
+                                            <img src={productImage} alt={productName} width={90} height={50} className="scale-110 rounded-lg" />
+                                        </div>
+                                        <div className="flex flex-col items-start justify-center py-3 px-4">
+                                            <span className="text-gray-800 text-lg font-semibold mb-1">{productName}</span>
+                                            <span className="text-gray-700 text-sm mb-1">
+                                                Initial investment: <span className="font-bold">{initialInvestment}</span>
+                                            </span>
+                                            <span className="text-gray-700 text-sm font-medium mb-1">
+                                                Gross Income: <span className="text-gray-900 font-bold">{grossIncome}</span>
+                                            </span>
+                                            <span className="text-gray-700 text-sm mb-1">
+                                                Profit: <span className="font-bold">{profit}</span>
+                                            </span>
+                                            <span className="text-gray-700 text-sm mb-1">
+                                                Delivery Status: <span className="font-bold">Delivering</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div className='rounded-lg bg-white/30 backdrop-blur-xs flex flex-col justify-center items-center py-6'>
+                        <img src="/assets/no-data.png" className='w-32 h-32' alt="No Data" />
+                    </div>
+                )}
             </div>
         </div>
     </div>
