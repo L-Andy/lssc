@@ -32,17 +32,24 @@ export default function Execute() {
                     const enrichedRentings = data.map((renting: any) => {
                         const product = products.find(p => p.id === renting.productId);
                         let profit = 0;
+                        let profitBreakdown: number[] = [];
                         if (product) {
                             const startDate = new Date(renting.$createdAt || renting.startDate);
                             const endDate = new Date();
                             const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
                             const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                            profit = (product.profit_value / 100) * product.price * diffDays;
+                            const dailyProfit = (product.profit_value / 100) * product.price;
+                            profit = dailyProfit * diffDays;
+                            // Build profit breakdown per day
+                            for (let i = 1; i <= diffDays; i++) {
+                                profitBreakdown.push(dailyProfit * i);
+                            }
                         }
                         return {
                             ...renting,
                             product,
                             profit,
+                            profitBreakdown,
                         };
                     });
 
@@ -90,7 +97,7 @@ export default function Execute() {
                     </div>
                 </div>
                 {rentings && rentings.length > 0 ? (
-                    rentings.map((renting: any) => {
+                    rentings.flatMap((renting: any) => {
                         const product = renting.product;
                         const productName = "LSSC-" + Math.floor(Math.random() * 10000);
                         const productImage = product?.image || '/assets/no-data.png';
@@ -104,32 +111,56 @@ export default function Execute() {
                             ? `${unitPrice} / ${runTimeDisplay}`
                             : 'N/A';
 
-                        return (
-                            <div key={renting.$id || product?.id} className="relative bg-white/50 rounded-2xl border border-yellow-200 shadow-lg w-full flex flex-col items-center mb-6">
-                                <div className="flex flex-col w-full h-full">
-                                    <div className="flex flex-row items-center justify-between w-full">
-                                        <div className="flex items-center px-4">
-                                            <img src={productImage} alt={productName} width={90} height={50} className="scale-110 rounded-lg" />
+                        // Show the product on the top, then below initial investment (left), profits (right), and below the date of that profit
+                        return renting.profitBreakdown.map((profitValue: any, idx: number) => {
+                            // Calculate the date for this profit breakdown
+                            const startDate = new Date(renting.$createdAt || renting.startDate);
+                            const profitDate = new Date(startDate);
+                            profitDate.setDate(startDate.getDate() + idx);
+
+                            // Format date as YYYY-MM-DD
+                            const formattedDate = profitDate.toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            return (
+                                <div
+                                    key={`${renting.$id || product?.id}-${idx}`}
+                                    className="relative bg-white/50 rounded-2xl border border-yellow-200 shadow-lg w-full flex flex-col items-center mb-6"
+                                >
+                                    {/* Product Name at the top */}
+                                    <div className="w-full flex flex-row items-center justify-center pt-4">
+                                        <span className="text-gray-800 text-lg font-semibold">{productName}</span>
+                                        <span className="ml-3 text-sm text-gray-500 font-medium">
+                                         <b>×{renting.product.profit_value}</b>
+                                        </span>
+                                    </div>
+                                    {/* Initial Investment (left) and Profit (right) */}
+                                    <div className="w-full flex flex-row justify-between items-center px-6 py-4">
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-gray-700 text-sm mb-1">
+                                                Initial investment:
+                                            </span>
+                                            <span className="font-bold text-gray-900">{initialInvestment}</span>
                                         </div>
-                                        <div className="flex flex-col items-start justify-center py-3 px-4">
-                                            <span className="text-gray-800 text-lg font-semibold mb-1">{productName}</span>
+                                        <div className="flex flex-col items-end">
                                             <span className="text-gray-700 text-sm mb-1">
-                                                Initial investment: <span className="font-bold">{initialInvestment}</span>
+                                                Profit:
                                             </span>
-                                            <span className="text-gray-700 text-sm font-medium mb-1">
-                                                Gross Income: <span className="text-gray-900 font-bold">{grossIncome}</span>
-                                            </span>
-                                            <span className="text-gray-700 text-sm mb-1">
-                                                Profit: <span className="font-bold">{profit}</span>
-                                            </span>
-                                            <span className="text-gray-700 text-sm mb-1">
-                                                Delivery Status: <span className="font-bold">Delivering</span>
-                                            </span>
+                                            <span className="font-bold text-green-700">{profitValue.toFixed(2)}</span>
                                         </div>
                                     </div>
+                                    {/* Date of that profit */}
+                                    <div className="w-full flex flex-row justify-center pb-4">
+                                        <span className="text-gray-500 text-xs">
+                                            {formattedDate}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        );
+                            );
+                        });
                     })
                 ) : (
                     <div className='rounded-lg bg-white/30 backdrop-blur-xs flex flex-col justify-center items-center py-6'>
