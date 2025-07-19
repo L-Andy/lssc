@@ -32,7 +32,7 @@ export default function Execute() {
                     const enrichedRentings = data.map((renting: any) => {
                         const product = products.find(p => p.id === renting.productId);
                         let profit = 0;
-                        let profitBreakdown: number[] = [];
+                        const profitBreakdown: number[] = [];
                         if (product) {
                             const startDate = new Date(renting.$createdAt || renting.startDate);
                             const endDate = new Date();
